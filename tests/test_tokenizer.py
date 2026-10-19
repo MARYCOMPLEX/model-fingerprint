@@ -56,11 +56,13 @@ def test_deltas_cancel_out_the_template(monkeypatch):
 
 def test_special_tokens_detected_as_sanitised(monkeypatch):
     def plain(text):
-        return len(text)
+        # Rough character counter; fullwidth pipes cost extra so a raw form can
+        # never coincide with its ASCII escape.
+        return len(text) + 2 * text.count("｜")
 
     def merges_fullwidth(text):
         # Pretend this vocabulary encodes '<｜User｜>' as a single token.
-        return len(text.replace("<｜User｜>", "x"))
+        return len(text.replace("<｜User｜>", "x")) + 2 * text.count("｜")
 
     families = []
     counters = {}

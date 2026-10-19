@@ -151,27 +151,32 @@ def run(client, log, families=None):
             key: counter(BASE + ascii_variant(special)) - counter(BASE)
             for key, counter in counters.items()
         }
-        # Rewrite signature: the observed delta equals the ASCII-escaped form
-        # for a candidate whose raw form disagrees.
-        rewritten = any(
-            raw_deltas[key] != api_delta and ascii_deltas[key] == api_delta
-            for key in counters
-        )
-        rows.append((special, api_delta, raw_deltas, rewritten))
+        rows.append((special, api_delta, raw_deltas, ascii_deltas))
 
-    # The gateway escapes fullwidth special characters in user content, so the
-    # whole special-token class is unreliable on such endpoints.
-    result.sanitised_specials = any(rewritten for _, _, _, rewritten in rows)
+    # Decide whether the endpoint escaped the special characters by comparing,
+    # per vocabulary, how often raw and ASCII-escaped forms explain the
+    # observed deltas.  A verbatim endpoint matches raw forms on nearly every
+    # row; a sanitising one matches escaped forms instead.
+    raw_hits = {key: 0 for key in counters}
+    ascii_hits = {key: 0 for key in counters}
+    for _, api_delta, raw_deltas, ascii_deltas in rows:
+        for key in counters:
+            raw_hits[key] += raw_deltas[key] == api_delta
+            ascii_hits[key] += ascii_deltas[key] == api_delta
+    majority = (len(rows) + 1) // 2
+    result.sanitised_specials = any(
+        ascii_hits[key] > raw_hits[key] and ascii_hits[key] >= majority
+        for key in counters
+    )
 
-    for special, api_delta, raw_deltas, rewritten in rows:
+    for special, api_delta, raw_deltas, _ in rows:
         if result.sanitised_specials:
             log(f"  {api_delta:>4d} " + " ".join(f"{raw_deltas[k]:>12d}" for k in counters)
                 + f"  {special}  [escaped by gateway, not scored]")
             continue
-        for key, counter in counters.items():
-            delta = raw_deltas[key]
+        for key in counters:
             scores[key].special_total += 1
-            scores[key].special_hits += delta == api_delta
+            scores[key].special_hits += raw_deltas[key] == api_delta
         log(f"  {api_delta:>4d} " + " ".join(f"{raw_deltas[k]:>12d}" for k in counters)
             + f"  {special}")
 
