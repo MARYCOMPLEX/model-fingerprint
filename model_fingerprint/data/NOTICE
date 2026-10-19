@@ -1,0 +1,25 @@
+Bundled reference files and their upstream sources.
+
+deepseek_v41.json.gz
+    tokenizer.json  <-  deepseek-ai/DeepSeek-V4.1-Flash-1017
+    license: MIT
+
+deepseek_v4.json.gz
+    tokenizer.json  <-  deepseek-ai/DeepSeek-V4-Flash-0731
+    license: MIT
+
+deepseek_v3.json.gz
+    tokenizer.json  <-  deepseek-ai/DeepSeek-V3
+    license: MIT (DeepSeek Model License applies to the weights; the
+              tokenizer files are redistributed for interoperability)
+
+qwen3.json.gz
+    tokenizer.json  <-  Qwen/Qwen3.8-27B
+    license: Apache-2.0
+
+deepseek_encoding.py
+    encoding.py     <-  deepseek-ai/DeepSeek-V4.1-Flash-1017/encoding/encoding.py
+    license: MIT
+
+These files are used only to recompute reference token counts. No model
+weights are bundled.

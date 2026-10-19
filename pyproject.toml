@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "model-fingerprint"
+version = "0.2.0"
+description = "Identify which model an OpenAI-compatible endpoint actually serves, via tokenizer deltas, capabilities and behaviour."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "MARYCOMPLEX" }]
+dependencies = [
+    "requests>=2.31",
+    "tokenizers>=0.15",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+openai = ["tiktoken>=0.7"]
+
+[project.scripts]
+model-fingerprint = "model_fingerprint.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["model_fingerprint*"]
+
+[tool.setuptools.package-data]
+"model_fingerprint.data" = ["*.json.gz", "*.py", "NOTICE"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+    "network: needs a live endpoint; skipped unless MODEL_FINGERPRINT_LIVE=1",
+]
